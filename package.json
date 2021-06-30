@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "sass": "^1.35.1"
+  },
+  "scripts": {
+    "start": "node ./scripts/start.js",
+    "deploy": "./script/deploy.sh"
+  }
+}

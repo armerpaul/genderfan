@@ -1,6 +1,7 @@
 const http = require('http')
 const fs = require('fs')
 const sass = require('sass')
+const mustache = require('mustache')
 
 const regex = {
   css: /.*\.css$/,
@@ -10,7 +11,12 @@ const port = process.env.PORT || 6969
 const SRC_DIR = './src/'
 const BUILD_DIR = './build/'
 const SASS_DIR = `${SRC_DIR}sass/`
+const SASS_INDEX = `${SASS_DIR}index.scss`
 const CSS_OUTPUT = `${BUILD_DIR}styles.css`
+const MUSTACHE_DIR = `${SRC_DIR}mustache/`
+const MUSTACHE_INDEX = `${MUSTACHE_DIR}index.mustache`
+const HTML_OUTPUT = `${BUILD_DIR}index.html`
+const MUSTACHE_TEMPLATE_DATA = {}
 
 const server = http.createServer((req, res) => {
   let filePath
@@ -23,7 +29,7 @@ const server = http.createServer((req, res) => {
     filePath = CSS_OUTPUT
     contentType = 'text/css'
   } else {
-		filePath = `${SRC_DIR}index.html`
+		filePath = HTML_OUTPUT
   	contentType = 'text/html'
 	}
 
@@ -34,10 +40,34 @@ const server = http.createServer((req, res) => {
 server.listen(port)
 console.log(`👂 Now serving at port ${port}`)
 
-fs.watch(SASS_DIR, (eventType, filePath) => {
-  result = sass.renderSync({
-		file: `${SASS_DIR}index.scss`,
-	})
-	fs.writeFileSync(CSS_OUTPUT, result.css.toString())
-	console.log(`🎨 Re-rendering styles (${filePath} file ${eventType})`)
-});
+const watchDir = ({ render, dir, type }) => {
+	fs.watch(dir, (eventType, filePath) => {
+		console.log(`${filePath} file ${eventType}`)
+		render()
+	});
+	render()
+	console.log(`👁 Now watching ${type} in ${dir}`)
+}
+
+// WATCH SASS STYLES
+watchDir({
+	type: 'styles',
+	dir: SASS_DIR,
+	render: () => {
+		result = sass.renderSync({ file: SASS_INDEX })
+		fs.writeFileSync(CSS_OUTPUT, result.css.toString())
+		console.log(`🎨 Re-rendered styles to ${CSS_OUTPUT}`)
+	}
+})
+
+// WATCH MUSTACHE TEMPLATE
+watchDir({
+	type: 'html',
+	dir: MUSTACHE_DIR,
+	render: () => {
+		const template = fs.readFileSync(MUSTACHE_INDEX, 'utf8')
+		const rendered = mustache.render(template, MUSTACHE_TEMPLATE_DATA);
+		fs.writeFileSync(HTML_OUTPUT, rendered)
+		console.log(`📝 Re-rendered html to ${HTML_OUTPUT}`)
+	}
+})

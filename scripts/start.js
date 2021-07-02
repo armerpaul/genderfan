@@ -4,6 +4,7 @@ const sass = require('sass')
 const mustache = require('mustache')
 
 const regex = {
+  js: /.*\.js$/,
   css: /.*\.css$/,
   img: /.*\.png|jpg|svg$/
 }
@@ -22,7 +23,10 @@ const server = http.createServer((req, res) => {
   let filePath
   let contentType
 
-  if (regex.img.test(req.url)) {
+  if (regex.js.test(req.url)) {
+    filePath = `${SRC_DIR}${req.url}`
+    contentType = 'text/javascript'
+  } else if (regex.img.test(req.url)) {
     filePath = `${SRC_DIR}${req.url}`
     contentType = 'image'
   } else if (regex.css.test(req.url)) {
@@ -43,7 +47,11 @@ console.log(`👂 Now serving at port ${port}`)
 const watchDir = ({ render, dir, type }) => {
 	fs.watch(dir, (eventType, filePath) => {
 		console.log(`${filePath} file ${eventType}`)
-		render()
+		try {
+			render()
+		} catch (e) {
+			console.error(`⚠️ Error compiling ${type}`, e)
+		}
 	});
 	render()
 	console.log(`👁 Now watching ${type} in ${dir}`)

@@ -2,3 +2,81 @@ html {
 	padding: 0;
 	margin: 0;
 }
+
+$screenTablet: 800px;
+
+$colorHeader: rgb(0, 0, 0);
+$colorFont: rgb(255, 255, 255);
+
+body {
+	font-family: 'PT Sans', sans-serif;
+	padding: 0.5rem 0.75rem;
+	background: var(--gender);
+
+	@media (min-width: $screenTablet) {
+		padding: 1rem 2rem;
+	}
+}
+
+$colorMale: rgba(0,183,255,1);
+$colorFemale: rgba(255,0,183,1);
+$colorAgender: rgba(255,255,255,1);
+$colorPointer: rgb(66, 66, 66);
+
+#fan {
+	width: 40rem;
+	height: 20rem;
+	margin: 10rem auto;
+	border-radius: 20rem 20rem 0 0;
+	background: $colorAgender;
+	background:
+		radial-gradient(at 50% 100%, $colorAgender, rgba($colorAgender, 0)),
+		linear-gradient(90deg, $colorFemale, rgba($colorFemale, 0)),
+		linear-gradient(90deg, rgba($colorMale, 0), $colorMale);
+	box-shadow: 0px 0px 5rem rgba(0, 0, 0, 0.35);
+}
+
+#pointer {
+	$pointerSize: 2rem;
+	$dotSize: 1.25rem;
+
+	width: $pointerSize;
+	height: $pointerSize;
+	border-radius: 50%;
+	background-color: $colorPointer;
+	position: absolute;
+	top: 35%;
+	left: 50%;
+
+	&:before {
+		position: absolute;
+		top: 80%;
+		left: .21em;
+		z-index: 0;
+		content: '';
+		border-color: $colorPointer transparent;
+		border-width: 1.5em 0.8em 0 0.8em;
+		border-style: solid;
+	}
+
+	&:after {
+		content: '';
+		position: absolute;
+		top: ($pointerSize - $dotSize) / 2;
+		left: ($pointerSize - $dotSize) / 2;
+		border-radius: 50%;
+		width: $dotSize;
+		height: $dotSize;
+		background: var(--gender);
+		z-index: 1;
+	}
+}
+
+header {
+	text-align: center;
+	font-family: 'Unica One', cursive;
+	font-size: 3rem;
+	height: 3rem;
+	color: $colorHeader;
+	opacity: 0.35;
+}

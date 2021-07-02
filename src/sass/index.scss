@@ -14,26 +14,26 @@ body {
 	background: var(--gender);
 
 	@media (min-width: $screenTablet) {
-		padding: 1rem 2rem;
+		padding: 2rem;
 	}
 }
 
 $colorMale: rgba(0,183,255,1);
 $colorFemale: rgba(255,0,183,1);
+$colorNB: mix($colorMale, $colorFemale);
 $colorAgender: rgba(255,255,255,1);
 $colorPointer: rgb(66, 66, 66);
 
 #fan {
 	width: 40rem;
 	height: 20rem;
-	margin: 10rem auto;
+	margin: 5rem auto;
 	border-radius: 20rem 20rem 0 0;
 	position: relative;
 	background: $colorAgender;
 	background:
 		radial-gradient(at 50% 100%, $colorAgender, rgba($colorAgender, 0)),
-		linear-gradient(90deg, $colorFemale, rgba($colorFemale, 0)),
-		linear-gradient(90deg, rgba($colorMale, 0), $colorMale);
+		linear-gradient(90deg, $colorFemale, $colorNB 50%, $colorMale 100%);
 	box-shadow: 0px 0px 5rem rgba(0, 0, 0, 0.35);
 }
 
@@ -65,8 +65,8 @@ $colorPointer: rgb(66, 66, 66);
 	&:after {
 		content: '';
 		position: absolute;
-		top: ($circleSize - $dotSize) / 2;
-		left: ($circleSize - $dotSize) / 2;
+		top: 0.5 * ($circleSize - $dotSize);
+		left: 0.5 * ($circleSize - $dotSize);
 		border-radius: 50%;
 		width: $dotSize;
 		height: $dotSize;
@@ -78,8 +78,8 @@ $colorPointer: rgb(66, 66, 66);
 header {
 	text-align: center;
 	font-family: 'Unica One', cursive;
-	font-size: 3rem;
-	height: 3rem;
+	font-size: 4rem;
+	height: 4rem;
 	color: $colorHeader;
-	opacity: 0.35;
+	opacity: 0.25;
 }

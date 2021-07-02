@@ -28,6 +28,7 @@ $colorPointer: rgb(66, 66, 66);
 	height: 20rem;
 	margin: 10rem auto;
 	border-radius: 20rem 20rem 0 0;
+	position: relative;
 	background: $colorAgender;
 	background:
 		radial-gradient(at 50% 100%, $colorAgender, rgba($colorAgender, 0)),
@@ -37,16 +38,18 @@ $colorPointer: rgb(66, 66, 66);
 }
 
 #pointer {
-	$pointerSize: 2rem;
+	$circleSize: 2rem;
 	$dotSize: 1.25rem;
+	$triangleSize: 1.5rem;
 
-	width: $pointerSize;
-	height: $pointerSize;
+	width: $circleSize;
+	height: $circleSize;
 	border-radius: 50%;
 	background-color: $colorPointer;
 	position: absolute;
-	top: 35%;
-	left: 50%;
+	margin-top: -0.95 * ($circleSize + $triangleSize);
+	margin-left: -0.5 * $circleSize;
+	display: none;
 
 	&:before {
 		position: absolute;
@@ -62,8 +65,8 @@ $colorPointer: rgb(66, 66, 66);
 	&:after {
 		content: '';
 		position: absolute;
-		top: ($pointerSize - $dotSize) / 2;
-		left: ($pointerSize - $dotSize) / 2;
+		top: ($circleSize - $dotSize) / 2;
+		left: ($circleSize - $dotSize) / 2;
 		border-radius: 50%;
 		width: $dotSize;
 		height: $dotSize;

@@ -108,6 +108,7 @@
 							`${segment.anchor2.left} ${segment.anchor2.top} ` +
 						'Z'
 				)
+				path.setAttributeNS(null, 'style', `transform-origin: ${rMaxPx}px ${rMaxPx}px`)
 			}
 			else {
 				path.setAttributeNS(
@@ -124,14 +125,23 @@
 							`${segment.rayLeft.start.left} ${segment.rayLeft.start.top} ` +
 						'Z'
 					)
+				path.setAttributeNS(
+					null,
+					'style',
+					`transform-origin: ${segment.rayMiddle.start.left}px ${segment.rayMiddle.start.top}px`
+				)
 			}
+
 			const color = {
 				r: interpolateGenderChannel({ color: 'r', t: segment.tAvg, r: segment.rAvg }),
 				g: interpolateGenderChannel({ color: 'g', t: segment.tAvg, r: segment.rAvg }),
 				b: interpolateGenderChannel({ color: 'b', t: segment.tAvg, r: segment.rAvg }),
 			}
 			const rgb = `rgb(${color.r}, ${color.g}, ${color.b})`
+			const strokeFade = 1.3
+			const strokeRgb = `rgb(${color.r * strokeFade}, ${color.g * strokeFade}, ${color.b * strokeFade})`
 			path.setAttributeNS(null, 'fill', rgb)
+			path.setAttributeNS(null, 'stroke', strokeRgb)
 
 			const select = () => {
 				document.querySelectorAll('path, circle').forEach(elem => elem.classList.remove(SELECTED))

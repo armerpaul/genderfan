@@ -14,9 +14,9 @@ $colorActiveGender: var(--gender);
 @mixin header-font {
 	font-family: 'Unica One', cursive;
 }
-@mixin transition ($properties) {
+@mixin transition ($properties...) {
 	transition-duration: 250ms;
-	transition-duration: $properties;
+	transition-property: $properties;
 }
 @mixin active-text-color {
 	color: var(--text);
@@ -52,8 +52,6 @@ body {
 	height: 20rem;
 	margin: 5rem auto;
 	position: relative;
-	// background: rgba(0, 0, 0, 0.15);
-	// box-shadow: 0px 0px 5rem rgba(0, 0, 0, 0.35);
 	display: grid;
 	grid-template-columns: auto;
   grid-template-rows: auto;
@@ -62,11 +60,21 @@ body {
 		"female .  agender  . male";
 
 	path {
-		@include transition(fill);
+		@include transition(fill, filter, transform, stroke-width);
+		cursor: pointer;
+		stroke-width: 0.1em;
+
+		&:hover {
+			filter: drop-shadow( 0 0 .5rem rgba(0, 0, 0, .25));
+			transform: scale(1.1);
+			stroke-width: 0.15rem;
+		}
 
 		&.selected {
+			cursor: default;
 			filter: drop-shadow( 0 0 1rem rgba(0, 0, 0, .7));
-			// fill: rgba(0, 0, 0, 0.251);
+			transform: scale(1.2);
+			stroke-width: 0.2rem;
 		}
 	}
 
@@ -118,45 +126,6 @@ body {
 			@include center();
 			@include bottom();
 		}
-	}
-}
-
-#pointer {
-	$circleSize: 2rem;
-	$dotSize: 1.25rem;
-	$triangleSize: 1.5rem;
-
-	width: $circleSize;
-	height: $circleSize;
-	border-radius: 50%;
-	background-color: $colorPointer;
-	position: absolute;
-	margin-top: -0.5 * $circleSize;
-	margin-left: -0.5 * $circleSize;
-	display: none;
-	@include transition(top left transform background-color);
-
-	&:before {
-		position: absolute;
-		top: 80%;
-		left: .21em;
-		z-index: 0;
-		content: '';
-		border-color: $colorPointer transparent;
-		border-width: 1.5em 0.8em 0 0.8em;
-		border-style: solid;
-	}
-
-	&:after {
-		content: '';
-		position: absolute;
-		top: 0.5 * ($circleSize - $dotSize);
-		left: 0.5 * ($circleSize - $dotSize);
-		border-radius: 50%;
-		width: $dotSize;
-		height: $dotSize;
-		background: $colorActiveGender;
-		z-index: 1;
 	}
 }
 

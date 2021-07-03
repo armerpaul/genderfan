@@ -1,6 +1,6 @@
 (() => {
-	const male = { r: 0, g: 183, b: 255 }
-	const female = { r: 255, g: 0, b: 183 }
+	const male = { r: 0, g: 140, b: 255 }
+	const female = { r: 255, g: 0, b: 140 }
 
 	const root = document.documentElement
 	const fan = document.querySelector('#fan')

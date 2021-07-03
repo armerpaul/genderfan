@@ -6,7 +6,7 @@
 	const fan = document.querySelector('#fan')
 	const pointer = document.querySelector('#pointer')
 
-	let isMouseDown = false
+	let isDraggingPointer = false
 
 	const interpolateGenderChannel = ({ color, t, r }) => {
 		const c = t * female[color] + (1 - t) * male[color]
@@ -31,10 +31,8 @@
 			b: interpolateGenderChannel({ color: 'b', t, r }),
 		}
 
-		root.style.setProperty(
-			'--gender',
-			`rgb(${color.r}, ${color.g}, ${color.b})`
-		);
+		root.style.setProperty('--gender', `rgb(${color.r}, ${color.g}, ${color.b})`)
+		root.style.setProperty('--text', `var(--${r < 0.45 ? 'dark' : 'light'}-text)`)
 
 		const rExt = r + 0.125
 		const cappedLeft = fan.clientHeight * (rExt * Math.cos(t * Math.PI) + 1)
@@ -46,15 +44,16 @@
 		pointer.style.left = `${cappedLeft}px`
 	}
 	fan.onmousedown = event => {
-		isMouseDown = true
+		isDraggingPointer = true
 		mouseMove(event)
 	}
 	fan.onmousemove = event => {
-		if (isMouseDown) {
+		if (isDraggingPointer) {
 			mouseMove(event)
 		}
 	}
-	fan.onmouseup = event => {
-		isMouseDown = false
-	}
+
+	const stopDragging = () => { isDraggingPointer = false }
+	fan.onmouseup = stopDragging
+	fan.onmouseleave = stopDragging
 })()

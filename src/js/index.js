@@ -1,59 +1,92 @@
 (() => {
+	const SEGMENTS_PER_ROW = [1, 8, 12, 16, 20]
+	const fan = document.querySelector('#fan')
+	const root = document.documentElement
+
+	fan.setAttribute('viewBox', `0 0 ${fan.clientWidth} ${fan.clientHeight}`)
+	/*
+		Ranges for polar coordinates:
+		[male] 0 < t < 1 [female]
+		[agender] 0 < r < 1 [full-gender]
+	*/
+	const rMaxPx = fan.clientHeight
+	const polarToTopLeft = ({ r, t }) => ({
+		left: rMaxPx * (r * Math.cos(t * Math.PI) + 1),
+		top: rMaxPx * (1 - r * Math.sin(t * Math.PI)),
+	})
+
 	const male = { r: 0, g: 140, b: 255 }
 	const female = { r: 255, g: 0, b: 140 }
-
-	const root = document.documentElement
-	const fan = document.querySelector('#fan')
-	const pointer = document.querySelector('#pointer')
-
-	let isDraggingPointer = false
-
 	const interpolateGenderChannel = ({ color, t, r }) => {
 		const c = t * female[color] + (1 - t) * male[color]
 		return (255 - c) * (1 - r) + c
 	}
-	const capValue = value => Math.max(Math.min(value, 1), 0)
 
-	const mouseMove = event => {
-		const left = event.clientX - fan.offsetLeft
-		const top = event.clientY - fan.offsetTop
+	const SPACING = 0.01
+	const rows = SEGMENTS_PER_ROW.map((segmentsPerRow, rowIndex) => {
+		const segments = []
+		for (let s = 0; s < segmentsPerRow; s++) {
+			const start = {
+				r: rowIndex / SEGMENTS_PER_ROW.length + SPACING,
+				t: s / segmentsPerRow + (SPACING / 4),
+			}
+			const end = {
+				r: (rowIndex + 1) / SEGMENTS_PER_ROW.length,
+				t: (s + 1) / segmentsPerRow - (SPACING / 4),
+			}
 
-		// fan is assumed to be a 2x1 box, so height = width / 2
-		const x = (left - (fan.clientWidth / 2)) / fan.clientHeight
-		const y = (fan.clientHeight - top) / fan.clientHeight
+			console.log({ start, end })
 
-		const r = capValue(Math.sqrt(x * x + y * y))
-		const t = capValue(Math.atan2(y, x) / Math.PI)
-
-		const color = {
-			r: interpolateGenderChannel({ color: 'r', t, r }),
-			g: interpolateGenderChannel({ color: 'g', t, r }),
-			b: interpolateGenderChannel({ color: 'b', t, r }),
+			segments.push({
+				BR: polarToTopLeft({ r: start.r, t: start.t }),
+				BL: polarToTopLeft({ r: start.r, t: end.t }),
+				TL: polarToTopLeft({ r: end.r, t: end.t }),
+				TR: polarToTopLeft({ r: end.r, t: start.t }),
+				tAvg: (end.t + start.t) / 2,
+				rAvg: (end.r + start.r) / 2,
+				rSmallPx: start.r * rMaxPx,
+				rLargePx: end.r * rMaxPx,
+			})
 		}
+		return segments
+	})
 
-		root.style.setProperty('--gender', `rgb(${color.r}, ${color.g}, ${color.b})`)
-		root.style.setProperty('--text', `var(--${r < 0.45 ? 'dark' : 'light'}-text)`)
+	const SELECTED = 'selected'
+	let isDragging = false
+	fan.onmousedown = () => { isDragging = true }
+	fan.onmouseup = () => { isDragging = false }
+	fan.onmouseleave = () => { isDragging = false }
 
-		const rExt = r + 0.125
-		const cappedLeft = fan.clientHeight * (rExt * Math.cos(t * Math.PI) + 1)
-		const cappedTop = fan.clientHeight * (1 - rExt * Math.sin(t * Math.PI))
-
-		pointer.style.display = 'block'
-		pointer.style.transform = `rotate(${(1 - t) * 180 - 90}deg)`
-		pointer.style.top = `${cappedTop}px`
-		pointer.style.left = `${cappedLeft}px`
-	}
-	fan.onmousedown = event => {
-		isDraggingPointer = true
-		mouseMove(event)
-	}
-	fan.onmousemove = event => {
-		if (isDraggingPointer) {
-			mouseMove(event)
-		}
-	}
-
-	const stopDragging = () => { isDraggingPointer = false }
-	fan.onmouseup = stopDragging
-	fan.onmouseleave = stopDragging
+	rows.forEach(segments => {
+		segments.forEach(segment => {
+			const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+			const pathDescription = `M ${segment.BR.left} ${segment.BR.top
+				} A ${segment.rSmallPx} ${segment.rSmallPx} 0 0 0 ${segment.BL.left} ${segment.BL.top
+				} L ${segment.TL.left} ${segment.TL.top
+				} A ${segment.rLargePx} ${segment.rLargePx} 0 0 1 ${segment.TR.left} ${segment.TR.top
+				} Z`
+			const color = {
+				r: interpolateGenderChannel({ color: 'r', t: segment.tAvg, r: segment.rAvg }),
+				g: interpolateGenderChannel({ color: 'g', t: segment.tAvg, r: segment.rAvg }),
+				b: interpolateGenderChannel({ color: 'b', t: segment.tAvg, r: segment.rAvg }),
+			}
+			const rgb = `rgb(${color.r}, ${color.g}, ${color.b})`
+			const select = () => {
+				document.querySelectorAll('path').forEach(p => p.classList.remove(SELECTED))
+				path.classList.add(SELECTED)
+				root.style.setProperty('--gender', rgb)
+				root.style.setProperty('--text', `var(--${segment.rAvg  < 0.45 ? 'dark' : 'light'}-text)`)
+			}
+			path.setAttributeNS(null, 'd', pathDescription)
+			path.setAttributeNS(null, 'fill', rgb)
+			path.onmousedown = select
+			path.onmousemove = () => {
+				if (isDragging) {
+					select()
+				}
+			}
+			// path.setAttributeNS(null, 'stroke', 'black')
+			fan.appendChild(path)
+		})
+	})
 })()

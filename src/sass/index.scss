@@ -5,13 +5,14 @@ html {
 
 $screenTablet: 800px;
 
-$colorHeader: rgb(0, 0, 0);
+$colorHeader: rgb(44, 44, 44);
 $colorFont: rgb(255, 255, 255);
+$colorActiveGender: var(--gender);
 
 body {
 	font-family: 'PT Sans', sans-serif;
 	padding: 0.5rem 0.75rem;
-	background: var(--gender);
+	background: $colorActiveGender;
 
 	@media (min-width: $screenTablet) {
 		padding: 2rem;
@@ -33,7 +34,7 @@ $colorPointer: rgb(66, 66, 66);
 	background: $colorAgender;
 	background:
 		radial-gradient(at 50% 100%, $colorAgender, rgba($colorAgender, 0)),
-		linear-gradient(90deg, $colorFemale, $colorNB 50%, $colorMale 100%);
+		linear-gradient(90deg, $colorFemale, $colorNB 40%, $colorNB 60%, $colorMale 100%);
 	box-shadow: 0px 0px 5rem rgba(0, 0, 0, 0.35);
 }
 
@@ -47,7 +48,7 @@ $colorPointer: rgb(66, 66, 66);
 	border-radius: 50%;
 	background-color: $colorPointer;
 	position: absolute;
-	margin-top: -0.95 * ($circleSize + $triangleSize);
+	margin-top: -0.5 * $circleSize;
 	margin-left: -0.5 * $circleSize;
 	display: none;
 
@@ -70,7 +71,7 @@ $colorPointer: rgb(66, 66, 66);
 		border-radius: 50%;
 		width: $dotSize;
 		height: $dotSize;
-		background: var(--gender);
+		background: $colorActiveGender;
 		z-index: 1;
 	}
 }
@@ -80,6 +81,7 @@ header {
 	font-family: 'Unica One', cursive;
 	font-size: 4rem;
 	height: 4rem;
-	color: $colorHeader;
-	opacity: 0.25;
+	color: white;
+	opacity: 0.4;
+	text-shadow: 0 0 0.5rem black;
 }

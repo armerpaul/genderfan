@@ -4,23 +4,26 @@
 
 	const root = document.documentElement
 	const fan = document.querySelector('#fan')
+	const pointer = document.querySelector('#pointer')
+
 	let isMouseDown = false
 
 	const interpolateGenderChannel = ({ color, t, r }) => {
 		const c = t * female[color] + (1 - t) * male[color]
 		return (255 - c) * (1 - r) + c
 	}
+	const capValue = value => Math.max(Math.min(value, 1), 0)
 
 	const mouseMove = event => {
 		const left = event.clientX - fan.offsetLeft
 		const top = event.clientY - fan.offsetTop
-		const pointer = document.querySelector('#pointer')
 
-		const x = (left - (fan.clientWidth / 2)) / (fan.clientWidth / 2)
+		// fan is assumed to be a 2x1 box, so height = width / 2
+		const x = (left - (fan.clientWidth / 2)) / fan.clientHeight
 		const y = (fan.clientHeight - top) / fan.clientHeight
 
-		const r = Math.sqrt(x * x + y * y) * 0.75
-		const t = Math.atan2(y, x) / Math.PI
+		const r = capValue(Math.sqrt(x * x + y * y))
+		const t = capValue(Math.atan2(y, x) / Math.PI)
 
 		const color = {
 			r: interpolateGenderChannel({ color: 'r', t, r }),
@@ -33,9 +36,14 @@
 			`rgb(${color.r}, ${color.g}, ${color.b})`
 		);
 
+		const rExt = r + 0.125
+		const cappedLeft = fan.clientHeight * (rExt * Math.cos(t * Math.PI) + 1)
+		const cappedTop = fan.clientHeight * (1 - rExt * Math.sin(t * Math.PI))
+
 		pointer.style.display = 'block'
-		pointer.style.top = `${top}px`
-		pointer.style.left = `${left}px`
+		pointer.style.transform = `rotate(${(1 - t) * 180 - 90}deg)`
+		pointer.style.top = `${cappedTop}px`
+		pointer.style.left = `${cappedLeft}px`
 	}
 	fan.onmousedown = event => {
 		isMouseDown = true
@@ -49,6 +57,4 @@
 	fan.onmouseup = event => {
 		isMouseDown = false
 	}
-
-	console.log(fan)
 })()

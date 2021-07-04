@@ -1,5 +1,19 @@
 (() => {
-	const SEGMENTS_PER_ROW = [1, 9, 13, 17, 21]
+	const CONFIG = {
+		COLOR: {
+			MALE: { r: 0, g: 140, b: 255 },
+			FEMALE: { r: 255, g: 0, b: 140 },
+		},
+		FAN: {
+			DARKNESS_THRESHOLD: 0.4,
+			SEGMENTS_PER_ROW: [1, 9, 13, 17, 21],
+			SELECTED_CLASS: 'selected',
+			STROKE_FADE: 1.3,
+			DARK_TEXT_VAR: 'dark-text',
+			LIGHT_TEXT_VAR: 'light-text',
+		}
+	}
+
 	const fan = document.querySelector('#fan')
 	const root = document.documentElement
 
@@ -15,18 +29,15 @@
 		top: rMaxPx * (1 - r * Math.sin(t * Math.PI)),
 	})
 
-	const male = { r: 0, g: 140, b: 255 }
-	const female = { r: 255, g: 0, b: 140 }
 	const interpolateGenderChannel = ({ color, t, r }) => {
-		const c = t * female[color] + (1 - t) * male[color]
+		const c = t * CONFIG.COLOR.FEMALE[color] + (1 - t) * CONFIG.COLOR.MALE[color]
 		return (255 - c) * (1 - r) + c
 	}
 
-	const SPACING = 0.01
-	const rows = SEGMENTS_PER_ROW.map((segmentsPerRow, rowIndex) => {
+	const rows = CONFIG.FAN.SEGMENTS_PER_ROW.map((segmentsPerRow, rowIndex) => {
 		const segments = []
 		for (let s = 0; s < segmentsPerRow; s++) {
-			const radiusPlus = (mod = 0) => (rowIndex + mod) * 0.85 / SEGMENTS_PER_ROW.length
+			const radiusPlus = (mod = 0) => (rowIndex + mod) * 0.85 / CONFIG.FAN.SEGMENTS_PER_ROW.length
 			const thetaPlus = (mod = 0) => (s + mod) / segmentsPerRow
 
 			if (segmentsPerRow === 1) {
@@ -89,7 +100,6 @@
 		return segments
 	})
 
-	const SELECTED = 'selected'
 	let isDragging = false
 	fan.onmousedown = () => { isDragging = true }
 	fan.onmouseup = () => { isDragging = false }
@@ -138,16 +148,25 @@
 				b: interpolateGenderChannel({ color: 'b', t: segment.tAvg, r: segment.rAvg }),
 			}
 			const rgb = `rgb(${color.r}, ${color.g}, ${color.b})`
-			const strokeFade = 1.3
-			const strokeRgb = `rgb(${color.r * strokeFade}, ${color.g * strokeFade}, ${color.b * strokeFade})`
+			const strokeRgb = `rgb(` +
+				`${color.r * CONFIG.FAN.STROKE_FADE}, ` +
+				`${color.g * CONFIG.FAN.STROKE_FADE}, ` +
+				`${color.b * CONFIG.FAN.STROKE_FADE})`
 			path.setAttributeNS(null, 'fill', rgb)
 			path.setAttributeNS(null, 'stroke', strokeRgb)
 
 			const select = () => {
-				document.querySelectorAll('path, circle').forEach(elem => elem.classList.remove(SELECTED))
-				path.classList.add(SELECTED)
+				document.querySelectorAll('path, circle').forEach(
+					elem => elem.classList.remove(CONFIG.FAN.SELECTED_CLASS)
+				)
+				path.classList.add(CONFIG.FAN.SELECTED_CLASS)
 				root.style.setProperty('--gender', rgb)
-				root.style.setProperty('--text', `var(--${segment.rAvg  < 0.3 ? 'dark' : 'light'}-text)`)
+				root.style.setProperty(
+					'--text',
+					`var(--${segment.rAvg < CONFIG.FAN.DARKNESS_THRESHOLD
+						? CONFIG.FAN.DARK_TEXT_VAR
+						: CONFIG.FAN.LIGHT_TEXT_VAR})`
+				)
 			}
 			path.onmousedown = select
 			path.onmousemove = () => {
